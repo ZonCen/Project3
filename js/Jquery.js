@@ -30,14 +30,14 @@ $("#name").keyup(() => { //If #name is empty this will turn the label red and wr
 	let value = $("#name").val();
 	labelColor(value === "", $("#name"), "Name:", "This is Empty:");
 });
-
 $("#name").focus(); //Focusing on the name input field when page is loaded
+
 /*FUNCTIONS*/
 function nameVal() {
 	return labelColor($("#name").val() === "", "#name", "Name:", "This is Empty");
 };
 function mailVal() {
-	var emailInput = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+	var emailInput = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 	var email = $("#mail");
 	return labelColor(email[0].value.length === 0 || !emailInput.test(email[0].value), email, "Email:", "You need to enter a Email adress");
 
@@ -113,9 +113,6 @@ function tShirt() {
 };
 
 /*Register for Activities*/
-document.getElementById("cc-num").maxLength = 16;
-document.getElementById("zip").maxLength = 5;
-document.getElementById("cvv").maxLength = 3;
 let counter = 0; //Total cost.
 $(".activities").append("<label id='count'>Total Cost:</label>"); //adding a label to the DOM
 $(".activities").on("change", (e) => {
@@ -164,7 +161,21 @@ function register() {
 }
 
 /*Payment Info*/
-$("#cc-num").append("onkeypress='return event.charCode >= 48 && event.charCode <= 57'"); // makes the Card Number div only digit available.
+
+document.getElementById("cc-num").maxLength = 16;
+document.getElementById("zip").maxLength = 5;
+document.getElementById("cvv").maxLength = 3;
+function numbersOnly(ele) {
+	$("#" + ele).on("keypress", function(e){
+	 if(e.charCode >= 48 && e.charCode <= 57){
+	 } else {
+	   e.preventDefault();  // Cancel the event
+	 }
+	});
+};
+numbersOnly("cc-num");
+numbersOnly("zip");
+numbersOnly("cvv");
 const payment = $("#payment"); //targets the payment div.
 const paymentOptions = $("#payment > option"); //Target the options of the payment div.
 const pDiv = $("p").parent(); //targets the parent divs of the p´s
@@ -209,15 +220,20 @@ function creditCard() { //To check that every rule are in place.
 		if(arguments[num]) {
 			document.getElementById(e).placeholder = txt
 			$("#"+e).prev().css("color", "red");
+			return true;
 		}else {
 			document.getElementById(e).placeholder = "";
 			$("#"+e).prev().css("color", "black");
+			return false;
 		}
 	}
 	if($(payment).val() === paymentOptions[1].value) { //if the credit card is shown.
 		payment.prev().css("color", "black");
 		payment.prev().text("I'm going to pay with:")
-		if(!args(0,"cc-num", "Need between 13 and 16 digits") && !args(1, "zip", "Need 5 digits") && !args(2, "cvv", "Need 3 digits")) {
+		let ccNum = args(0,"cc-num", "Need between 13 and 16 digits");
+		let zip = args(1, "zip", "Need 5 digits");
+		let cvv = args(2, "cvv", "Need 3 digits");
+		if(!ccNum && !zip && !cvv) {
 			return true;	
 		} 	
 	}else { //If anything else is showned. Return false if "Select Payment Method is picked."
